@@ -3,10 +3,14 @@ set -xe
 PROJECT_DIR="$1"
 PLATFORM=$(PYTHONPATH=tools python -c "import openblas_support; print(openblas_support.get_plat())")
 
-# Update license
 if [[ $RUNNER_OS == "Linux" ]] ; then
-    cat $PROJECT_DIR/tools/wheels/LICENSE_linux.txt >> $PROJECT_DIR/LICENSE.txt
-elif [[ $RUNNER_OS == "macOS" ]]; then
+  pipx install -f 'auditwheel==5.2.0'
+  PYTHONPATH=tools python -c "import openblas_support; openblas_support.make_init('numpy')"
+  exit 0
+fi
+
+# Update license
+if [[ $RUNNER_OS == "macOS" ]]; then
     cat $PROJECT_DIR/tools/wheels/LICENSE_osx.txt >> $PROJECT_DIR/LICENSE.txt
 elif [[ $RUNNER_OS == "Windows" ]]; then
     cat $PROJECT_DIR/tools/wheels/LICENSE_win32.txt >> $PROJECT_DIR/LICENSE.txt

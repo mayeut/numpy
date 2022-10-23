@@ -429,6 +429,11 @@ def setup_package():
             'f2py%s.%s = numpy.f2py.f2py2e:main' % sys.version_info[:2],
             ]
 
+    # OpenBLAS wheel
+    dependencies = []
+    if os.environ.get("OPENBLAS64_", "") == "::wheel::":
+        dependencies.append("openblas")
+
     cmdclass["sdist"] = sdist_checked
     metadata = dict(
         name='numpy',
@@ -457,6 +462,8 @@ def setup_package():
             'array_api': ['numpy = numpy.array_api'],
             'pyinstaller40': ['hook-dirs = numpy:_pyinstaller_hooks_dir'],
         },
+        install_requires=dependencies,
+        setup_requires=dependencies,
     )
 
     if "--force" in sys.argv:

@@ -17,7 +17,9 @@ fi
 export NPY_AVAILABLE_MEM="4 GB"
 python -c "import sys; import numpy; sys.exit(not numpy.test('full'))"
 
-python $PROJECT_DIR/tools/wheels/check_license.py
+if [[ $UNAME == "Windows" || $UNAME == "Darwin" ]] ; then
+    python $PROJECT_DIR/tools/wheels/check_license.py
+fi
 if [[ $UNAME == "Linux" || $UNAME == "Darwin" ]] ; then
     python $PROJECT_DIR/tools/openblas_support.py --check_version
 fi

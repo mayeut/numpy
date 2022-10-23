@@ -207,6 +207,7 @@ def make_init(dirname):
             '''
             import os
             import glob
+            import openblas
             if os.name == 'nt':
                 # convention for storing / loading the DLL from
                 # numpy/.libs/, if present

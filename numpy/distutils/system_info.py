@@ -889,6 +889,10 @@ class system_info:
                          self.__class__.__name__, '(%s is None)'
                          % (env_var,))
                 return []
+            if d == "::wheel::":
+                import openblas
+                d = f"{openblas.get_include_dir()}{os.pathsep}{openblas.get_lib_dir()}"
+
             if os.path.isfile(d):
                 dirs = [os.path.dirname(d)] + dirs
                 l = getattr(self, '_lib_names', [])
@@ -2351,6 +2355,7 @@ class openblas_info(blas_info):
             try:
                 c.link_executable(obj, out, libraries=info['libraries'],
                                   library_dirs=info['library_dirs'],
+                                  extra_preargs=["-Wl,--allow-shlib-undefined"],
                                   extra_postargs=extra_args)
                 res = True
             except distutils.ccompiler.LinkError:
@@ -2395,7 +2400,7 @@ class openblas64__info(openblas_ilp64_info):
     # ILP64 Openblas, with default symbol suffix
     section = 'openblas64_'
     dir_env_var = 'OPENBLAS64_'
-    _lib_names = ['openblas64_']
+    _lib_names = ['openblas64_' if os.environ.get("OPENBLAS64_", "") != "::wheel::" else "openblas_python" ]
     symbol_suffix = '64_'
     symbol_prefix = ''
 
