@@ -25,7 +25,7 @@ from numpy.testing import (
     assert_equal,
     assert_raises,
 )
-from numpy.testing._private.utils import requires_deep_recursion
+from numpy.testing._private.utils import requires_deep_recursion, xfail_known_leak
 
 
 def assert_dtype_equal(a, b):
@@ -1519,6 +1519,7 @@ class TestFromDTypeAttribute:
         with pytest.raises(ValueError):
             np.dtype(dt_instance)
 
+    @xfail_known_leak
     def test_void_subtype(self):
         class dt(np.void):
             # This code path is fully untested before, so it is unclear
@@ -1898,6 +1899,7 @@ class TestUserDType:
     @pytest.mark.thread_unsafe(
         reason="crashes when GIL disabled, dtype setup is thread-unsafe",
     )
+    @xfail_known_leak
     def test_custom_structured_dtype(self):
         class mytype:
             pass
@@ -1921,6 +1923,7 @@ class TestUserDType:
     @pytest.mark.thread_unsafe(
         reason="crashes when GIL disabled, dtype setup is thread-unsafe",
     )
+    @xfail_known_leak
     def test_custom_structured_dtype_errors(self):
         class mytype:
             pass
