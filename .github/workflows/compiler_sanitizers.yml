@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - lsan
   pull_request:
     branches:
       - main
@@ -111,7 +112,7 @@ jobs:
 
   gcc_ASAN:
     # To enable this workflow on a fork, comment out:
-    if: github.repository == 'numpy/numpy'
+    # if: github.repository == 'numpy/numpy'
     runs-on: ubuntu-latest
 
     steps:
