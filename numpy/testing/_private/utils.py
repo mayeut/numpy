@@ -2865,21 +2865,3 @@ def requires_deep_recursion(func):
                         "deep recursion")
         return func(*args, **kwargs)
     return wrapper
-
-
-def xfail_known_leak(func):
-    """Decorator to xfail test if it results in a leak."""
-    import pytest
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        cflags = sysconfig.get_config_var('CFLAGS') or ''
-        config_args = sysconfig.get_config_var('CONFIG_ARGS') or ''
-        address_sanitizer = (
-            '-fsanitize=address' in cflags or
-            '--with-address-sanitizer' in config_args
-        )
-        if address_sanitizer:
-            pytest.xfail(reason="known leak")
-        return func(*args, **kwargs)
-    return wrapper

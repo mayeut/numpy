@@ -2,6 +2,7 @@ import contextlib
 import ctypes
 import inspect
 import operator
+import os
 import pickle
 import sys
 import types
@@ -25,7 +26,7 @@ from numpy.testing import (
     assert_equal,
     assert_raises,
 )
-from numpy.testing._private.utils import requires_deep_recursion, xfail_known_leak
+from numpy.testing._private.utils import requires_deep_recursion
 
 
 def assert_dtype_equal(a, b):
@@ -1519,7 +1520,7 @@ class TestFromDTypeAttribute:
         with pytest.raises(ValueError):
             np.dtype(dt_instance)
 
-    @xfail_known_leak
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_void_subtype(self):
         class dt(np.void):
             # This code path is fully untested before, so it is unclear
@@ -1899,7 +1900,7 @@ class TestUserDType:
     @pytest.mark.thread_unsafe(
         reason="crashes when GIL disabled, dtype setup is thread-unsafe",
     )
-    @xfail_known_leak
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_custom_structured_dtype(self):
         class mytype:
             pass
@@ -1923,7 +1924,7 @@ class TestUserDType:
     @pytest.mark.thread_unsafe(
         reason="crashes when GIL disabled, dtype setup is thread-unsafe",
     )
-    @xfail_known_leak
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_custom_structured_dtype_errors(self):
         class mytype:
             pass

@@ -1,5 +1,6 @@
 import copy
 import gc
+import os
 import pickle
 import sys
 import tempfile
@@ -32,7 +33,6 @@ from numpy.testing._private.utils import (
     _no_tracing,
     requires_deep_recursion,
     requires_memory,
-    xfail_known_leak,
 )
 
 
@@ -1916,7 +1916,7 @@ class TestRegression:
     @pytest.mark.filterwarnings(
         "ignore:.*align should be passed:numpy.exceptions.VisibleDeprecationWarning",
     )
-    @xfail_known_leak
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_pickle_py2_array_latin1_hack(self):
         # Check that unpickling hacks in Py3 that support
         # encoding='latin1' work correctly.
