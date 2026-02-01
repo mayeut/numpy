@@ -110,113 +110,73 @@ jobs:
           `find numpy -name "test*.py" | xargs grep -E -l "import threading|ThreadPoolExecutor" | tr '\n' ' '` \
            -- -v -s --timeout=600 --durations=10
 
-  gcc_ASAN:
+  clang_ASAN:
     # To enable this workflow on a fork, comment out:
     # if: github.repository == 'numpy/numpy'
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/nascheme/numpy-asan:3.14t
+        options: --shm-size=2g # increase memory for large matrix ops
 
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      with:
-        submodules: recursive
-        fetch-tags: true
-        persist-credentials: false
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Trust working directory and initialize submodules
+        run: |
+          git config --global --add safe.directory /__w/numpy/numpy
+          git submodule update --init --recursive
+      - name: Uninstall pytest-xdist (conflicts with TSAN)
+        run: pip uninstall -y pytest-xdist
 
-    - name: Set up pyenv
-      run: |
-        git clone https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
-        PYENV_ROOT="$HOME/.pyenv"
-        PYENV_BIN="$PYENV_ROOT/bin"
-        PYENV_SHIMS="$PYENV_ROOT/shims"
-        echo "$PYENV_BIN" >> $GITHUB_PATH
-        echo "$PYENV_SHIMS" >> $GITHUB_PATH
-        echo "PYENV_ROOT=$PYENV_ROOT" >> $GITHUB_ENV
+      - name: Upgrade spin (gh-29777)
+        run: pip install -U spin
 
-    - name: Check pyenv is working
-      run: pyenv --version
+      - name: Build NumPy with AddressSanitizer & LeakSanitizer
+        run: python -m spin build -j4 -- -Db_sanitize=address,leak
 
-    - name: Install python & numpy build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get -yq install \
-          libb2-dev \
-          libbz2-dev \
-          libffi-dev \
-          libgdbm-dev \
-          libgdbm-compat-dev \
-          liblzma-dev \
-          libncurses5-dev \
-          libopenblas-dev \
-          libreadline6-dev \
-          libsqlite3-dev \
-          libssl-dev \
-          libzstd-dev \
-          lzma-dev \
-          ninja-build \
-          tk-dev \
-          uuid-dev \
-          zlib1g-dev
+      - name: Test
+        run: |
+          # pass -s to pytest to see ASAN errors and warnings, otherwise pytest captures them
+          export ASAN_OPTIONS="detect_leaks=1:symbolize=1:strict_init_order=true:allocator_may_return_null=1:use_sigaltstack=0"
+          export LSAN_OPTIONS="suppressions=$GITHUB_WORKSPACE/tools/ci/lsan_suppressions.txt"
+          python -m spin test -- -v -s --timeout=600 --durations=10
+          exit 0
+          for FILE in $(find numpy -name "test*.py" | sort); do
+            case "${FILE}" in
+              numpy/_core/*) ;; # skip to remove
+              numpy/f2py/*) ;; # skip to remove
+              numpy/fft/*) ;; # skip to remove
+              numpy/lib/*) ;; # skip to remove
+              numpy/linalg/*) ;; # skip to remove
+              numpy/ma/*) ;; # skip to remove
+              numpy/matrixlib/*) ;; # skip to remove
+              numpy/polynomial/*) ;; # skip to remove
+              numpy/random/*) ;; # skip to remove
+              numpy/testing/*) ;; # skip to remove
+              numpy/tests/*) ;; # skip to remove
 
-    - name: Build Python with address sanitizer
-      run: |
-        CONFIGURE_OPTS="--with-address-sanitizer" pyenv install 3.14
-        pyenv global 3.14
-
-    - name: Install dependencies
-      run: |
-        pip install -r requirements/build_requirements.txt
-        pip install -r requirements/ci_requirements.txt
-        pip install -r requirements/test_requirements.txt
-        # xdist captures stdout/stderr, but we want the ASAN output
-        pip uninstall -y pytest-xdist
-
-    - name: Build
-      run: python -m spin build -j4 -- -Db_sanitize=address,leak
-
-    - name: Test
-      run: |
-        # pass -s to pytest to see ASAN errors and warnings, otherwise pytest captures them
-        export ASAN_OPTIONS="detect_leaks=1:symbolize=1:strict_init_order=true:allocator_may_return_null=1:use_sigaltstack=0"
-        export LSAN_OPTIONS="suppressions=$GITHUB_WORKSPACE/tools/ci/lsan_suppressions.txt"
-        python -m spin test -- -v -s --timeout=600 --durations=10
-        exit 0
-        for FILE in $(find numpy -name "test*.py" | sort); do
-          case "${FILE}" in
-            numpy/_core/*) ;; # skip to remove
-            numpy/f2py/*) ;; # skip to remove
-            numpy/fft/*) ;; # skip to remove
-            numpy/lib/*) ;; # skip to remove
-            numpy/linalg/*) ;; # skip to remove
-            numpy/ma/*) ;; # skip to remove
-            numpy/matrixlib/*) ;; # skip to remove
-            numpy/polynomial/*) ;; # skip to remove
-            numpy/random/*) ;; # skip to remove
-            numpy/testing/*) ;; # skip to remove
-            numpy/tests/*) ;; # skip to remove
-
-            numpy/_core/src/common/pythoncapi-compat/tests/*) ;;
-            numpy/_core/tests/test_array_interface.py) ;; # skip, no test selected
-            numpy/_core/tests/test_cpu_dispatcher.py) ;; # skip, can't be filtered properly
-            numpy/_core/tests/test_dtype.py) ;; # skip, can't be filtered properly
-            numpy/_core/tests/test_regression.py) ;; # investigate leak
-            numpy/_pyinstaller/tests/test_pyinstaller.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_abstract_interface.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_assumed_shape.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_block_docstring.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_docs.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_modules.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_quoted_character.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_return_character.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_return_complex.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_return_integer.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_return_logical.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_return_real.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_routines.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_size.py) ;; # skip, no test selected
-            numpy/f2py/tests/test_value_attrspec.py) ;; # skip, no test selected
-            numpy/ma/testutils.py) ;; # skip, no test selected
-            numpy/tests/test_warnings.py) ;; # skip, no test selected
-            numpy/typing/tests/test_typing.py) ;; # skip, no test selected
-            *) python -m spin test -- -v -s --timeout=600 --durations=10 -k "not test_cpu_dispatcher and not test_dtype" ${FILE};;
-          esac
-        done
+              numpy/_core/src/common/pythoncapi-compat/tests/*) ;;
+              numpy/_core/tests/test_array_interface.py) ;; # skip, no test selected
+              numpy/_core/tests/test_cpu_dispatcher.py) ;; # skip, can't be filtered properly
+              numpy/_core/tests/test_dtype.py) ;; # skip, can't be filtered properly
+              numpy/_core/tests/test_regression.py) ;; # investigate leak
+              numpy/_pyinstaller/tests/test_pyinstaller.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_abstract_interface.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_assumed_shape.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_block_docstring.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_docs.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_modules.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_quoted_character.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_return_character.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_return_complex.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_return_integer.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_return_logical.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_return_real.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_routines.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_size.py) ;; # skip, no test selected
+              numpy/f2py/tests/test_value_attrspec.py) ;; # skip, no test selected
+              numpy/ma/testutils.py) ;; # skip, no test selected
+              numpy/tests/test_warnings.py) ;; # skip, no test selected
+              numpy/typing/tests/test_typing.py) ;; # skip, no test selected
+              *) python -m spin test -- -v -s --timeout=600 --durations=10 -k "not test_cpu_dispatcher and not test_dtype" ${FILE};;
+            esac
+          done
