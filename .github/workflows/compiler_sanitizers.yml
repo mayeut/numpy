@@ -138,21 +138,21 @@ jobs:
           # pass -s to pytest to see ASAN errors and warnings, otherwise pytest captures them
           export ASAN_OPTIONS="detect_leaks=1:symbolize=1:strict_init_order=true:allocator_may_return_null=1:use_sigaltstack=0"
           export LSAN_OPTIONS="suppressions=$GITHUB_WORKSPACE/tools/ci/lsan_suppressions.txt"
-          python -m spin test -- -v -s --timeout=600 --durations=10
-          exit 0
+          # python -m spin test -- -v -s --timeout=600 --durations=10
+          # exit 0
           for FILE in $(find numpy -name "test*.py" | sort); do
             case "${FILE}" in
-              numpy/_core/*) ;; # skip to remove
-              numpy/f2py/*) ;; # skip to remove
-              numpy/fft/*) ;; # skip to remove
-              numpy/lib/*) ;; # skip to remove
-              numpy/linalg/*) ;; # skip to remove
-              numpy/ma/*) ;; # skip to remove
-              numpy/matrixlib/*) ;; # skip to remove
-              numpy/polynomial/*) ;; # skip to remove
-              numpy/random/*) ;; # skip to remove
-              numpy/testing/*) ;; # skip to remove
-              numpy/tests/*) ;; # skip to remove
+              # numpy/_core/*) ;; # skip to remove
+              # numpy/f2py/*) ;; # skip to remove
+              # numpy/fft/*) ;; # skip to remove
+              # numpy/lib/*) ;; # skip to remove
+              # numpy/linalg/*) ;; # skip to remove
+              # numpy/ma/*) ;; # skip to remove
+              # numpy/matrixlib/*) ;; # skip to remove
+              # numpy/polynomial/*) ;; # skip to remove
+              # numpy/random/*) ;; # skip to remove
+              # numpy/testing/*) ;; # skip to remove
+              # numpy/tests/*) ;; # skip to remove
 
               numpy/_core/src/common/pythoncapi-compat/tests/*) ;;
               numpy/_core/tests/test_array_interface.py) ;; # skip, no test selected
