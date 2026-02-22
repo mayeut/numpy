@@ -31,3 +31,7 @@
 #23 0xffffb1c61b44 in initialize_static_globals ../numpy/_core/src/multiarray/npy_static_data.c:124
 
 leak:initialize_static_globals
+
+# leaks from _multiarray_umath_exec
+leak:init_string_dtype
+leak:initumath
