@@ -173,7 +173,7 @@ jobs:
     - name: Build Python with address sanitizer
       run: |
         CONFIGURE_OPTS="--with-address-sanitizer" pyenv install 3.14t
-        pyenv global 3.14
+        pyenv global 3.14t
 
     - name: Install dependencies
       run: |
