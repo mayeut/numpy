@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - lsan
+      - lsan-clang
   pull_request:
     branches:
       - main
@@ -110,7 +111,7 @@ jobs:
           `find numpy -name "test*.py" | xargs grep -E -l "import threading|ThreadPoolExecutor" | tr '\n' ' '` \
            -- -v -s --timeout=600 --durations=10
 
-  gcc_ASAN:
+  clang_ASAN:
     # To enable this workflow on a fork, comment out:
     # if: github.repository == 'numpy/numpy'
     runs-on: ubuntu-latest
@@ -156,6 +157,18 @@ jobs:
           tk-dev \
           uuid-dev \
           zlib1g-dev
+
+    - name: Install clang 21
+      run: |
+        curl -fsSLo /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        chmod +x /tmp/llvm.sh
+        sudo /tmp/llvm.sh 21
+        CC=/usr/bin/clang-21
+        CXX=/usr/bin/clang++-21
+        echo "CC=$CC" >> $GITHUB_ENV
+        echo "CXX=$CXX" >> $GITHUB_ENV
+        sudo update-alternatives --install /usr/bin/cc cc $CC 100
+        sudo update-alternatives --install /usr/bin/c++ c++ $CXX 100
 
     - name: Build Python with address sanitizer
       run: |
