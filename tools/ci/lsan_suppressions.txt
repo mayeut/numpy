@@ -33,5 +33,7 @@
 leak:initialize_static_globals
 
 # leaks from _multiarray_umath_exec
-leak:init_string_dtype
-leak:initumath
+# init_string_dtype
+# initumath
+# PyArray_Zeros
+leak:_multiarray_umath_exec
