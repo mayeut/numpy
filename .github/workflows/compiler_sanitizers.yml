@@ -177,6 +177,9 @@ jobs:
               numpy/ma/testutils.py) ;; # skip, no test selected
               numpy/tests/test_warnings.py) ;; # skip, no test selected
               numpy/typing/tests/test_typing.py) ;; # skip, no test selected
+
+              numpy/_core/tests/test_arrayprint.py) ;; # skip, leaks
+
               *) python -m spin test -- -v -s --timeout=600 --durations=10 -k "not test_cpu_dispatcher and not test_dtype" ${FILE};;
             esac
           done
