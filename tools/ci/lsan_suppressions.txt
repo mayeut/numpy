@@ -37,3 +37,6 @@ leak:initialize_static_globals
 # initumath
 # PyArray_Zeros
 leak:_multiarray_umath_exec
+
+# tests
+leak:PyInit__rational_tests
