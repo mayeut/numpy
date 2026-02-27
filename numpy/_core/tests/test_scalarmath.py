@@ -1,6 +1,7 @@
 import contextlib
 import itertools
 import operator
+import os
 import platform
 import sys
 import warnings
@@ -861,6 +862,7 @@ def recursionlimit(n):
        sampled_from(binary_operators_for_scalar_ints),
        sampled_from(types + [rational]))
 @pytest.mark.thread_unsafe(reason="sets recursion limit globally")
+@pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
 def test_operator_object_left(o, op, type_):
     try:
         with recursionlimit(200):
@@ -873,6 +875,7 @@ def test_operator_object_left(o, op, type_):
        sampled_from(binary_operators_for_scalar_ints),
        sampled_from(types + [rational]))
 @pytest.mark.thread_unsafe(reason="sets recursion limit globally")
+@pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
 def test_operator_object_right(o, op, type_):
     try:
         with recursionlimit(200):
@@ -884,6 +887,7 @@ def test_operator_object_right(o, op, type_):
 @given(sampled_from(binary_operators_for_scalars),
        sampled_from(types),
        sampled_from(types))
+@pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
 def test_operator_scalars(op, type1, type2):
     try:
         op(type1(1), type2(1))

@@ -1,6 +1,7 @@
 import inspect
 import itertools
 import math
+import os
 import platform
 import sys
 import warnings
@@ -2854,6 +2855,7 @@ class TestClip:
             shape=hynp.array_shapes()
         )
     )
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_clip_property(self, data, arr):
         """A property-based test using Hypothesis.
 

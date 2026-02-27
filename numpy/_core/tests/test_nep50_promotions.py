@@ -5,6 +5,7 @@ is adopted in the main test suite.  A few may be moved elsewhere.
 """
 
 import operator
+import os
 
 import hypothesis
 import pytest
@@ -197,6 +198,7 @@ def test_nep50_in_concat_and_choose():
             [np.int8, np.uint8, 0, np.bool]),
         ])
 @hypothesis.given(data=strategies.data())
+@pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
 def test_expected_promotion(expected, dtypes, optional_dtypes, data):
     # Sample randomly while ensuring "dtypes" is always present:
     optional = data.draw(strategies.lists(

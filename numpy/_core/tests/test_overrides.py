@@ -408,6 +408,7 @@ class TestArrayFunctionImplementation:
 
             assert exc.args == expected_exception.args
 
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     @pytest.mark.parametrize("value", [234, "this func is not replaced"])
     def test_dispatcher_error(self, value):
         # If the dispatcher raises an error, we must not attempt to mutate it

@@ -31,3 +31,16 @@
 #23 0xffffb1c61b44 in initialize_static_globals ../numpy/_core/src/multiarray/npy_static_data.c:124
 
 leak:initialize_static_globals
+
+# leaks from _multiarray_umath_exec
+# init_string_dtype
+# initumath
+# PyArray_Zeros
+leak:_multiarray_umath_exec
+
+# leaks from _umath_linalg_exec
+# addUfuncs
+leak:_umath_linalg_exec
+
+# tests
+leak:PyInit__rational_tests

@@ -1,4 +1,5 @@
 import gc
+import os
 import sys
 import textwrap
 
@@ -533,6 +534,7 @@ class TestArray2String:
             '                     [1.]])]], dtype=object)'
         )
 
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     @given(hynp.from_dtype(np.dtype("U")))
     def test_any_text(self, text):
         # This test checks that, given any value that can be represented in an

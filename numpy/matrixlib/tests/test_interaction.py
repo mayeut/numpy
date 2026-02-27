@@ -2,6 +2,7 @@
 
 Note that tests with MaskedArray and linalg are done in separate files.
 """
+import os
 import textwrap
 import warnings
 
@@ -34,6 +35,7 @@ def test_fancy_indexing():
     assert_equal(x[:2, np.array(-1)], x[:2, -1].T)
 
 
+@pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
 def test_polynomial_mapdomain():
     # test that polynomial preserved matrix subtype.
     # 2018-04-29: moved here from polynomial.tests.polyutils.

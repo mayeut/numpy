@@ -1,6 +1,7 @@
 import decimal
 import math
 import operator
+import os
 import sys
 import warnings
 from fractions import Fraction
@@ -4072,6 +4073,7 @@ class TestQuantile:
                        shape=st.integers(min_value=3, max_value=1000),
                        elements=st.floats(allow_infinity=False, allow_nan=False,
                                           min_value=-1e300, max_value=1e300)))
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_quantile_monotonic_hypo(self, arr):
         p0 = np.arange(0, 1, 0.01)
         quantile = np.quantile(arr, p0)
@@ -4407,6 +4409,7 @@ class TestLerp:
                                   min_value=-1e300, max_value=1e300),
                       b=st.floats(allow_nan=False, allow_infinity=False,
                                   min_value=-1e300, max_value=1e300))
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_linear_interpolation_formula_monotonic(self, t0, t1, a, b):
         l0 = nfb._lerp(a, b, t0)
         l1 = nfb._lerp(a, b, t1)
@@ -4423,6 +4426,7 @@ class TestLerp:
                                   min_value=-1e300, max_value=1e300),
                       b=st.floats(allow_nan=False, allow_infinity=False,
                                   min_value=-1e300, max_value=1e300))
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_linear_interpolation_formula_bounded(self, t, a, b):
         if a <= b:
             assert a <= nfb._lerp(a, b, t) <= b
@@ -4435,6 +4439,7 @@ class TestLerp:
                                   min_value=-1e300, max_value=1e300),
                       b=st.floats(allow_nan=False, allow_infinity=False,
                                   min_value=-1e300, max_value=1e300))
+    @pytest.mark.xfail("LSAN_OPTIONS" in os.environ, reason="known leak", run=False)
     def test_linear_interpolation_formula_symmetric(self, t, a, b):
         # double subtraction is needed to remove the extra precision of t < 0.5
         left = nfb._lerp(a, b, 1 - (1 - t))
