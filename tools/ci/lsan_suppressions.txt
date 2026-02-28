@@ -44,3 +44,25 @@ leak:_umath_linalg_exec
 
 # tests
 leak:PyInit__rational_tests
+
+
+# globals leak when running with LSAN_OPTIONS="use_globals=false ..."
+
+# cancastto always leaks
+leak:PyArray_RegisterCanCast
+
+# calls realloc on global data, never freed
+leak:PyArray_RegisterDataType
+
+# leak:__pyx_pymod_exec__generator
+
+leak:pymain_init
+leak:PyInit_readline
+leak:_PyPathConfig_UpdateGlobal
+leak:dlopen
+leak:_ctypes_mod_exec
+leak:_locale_setlocale_impl
+leak:localtime_r
+leak:os_putenv_impl
+leak:getpwuid_r
+leak:vprintf
