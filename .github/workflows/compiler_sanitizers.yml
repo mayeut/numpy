@@ -159,7 +159,6 @@ jobs:
 
               numpy/_core/src/common/pythoncapi-compat/tests/*) ;;
               numpy/_core/tests/test_array_interface.py) ;; # skip, no test selected
-              numpy/_core/tests/test_cpu_dispatcher.py) ;; # skip, no test selected
               numpy/_pyinstaller/tests/test_pyinstaller.py) ;; # skip, no test selected
               numpy/f2py/tests/test_abstract_interface.py) ;; # skip, no test selected
               numpy/f2py/tests/test_assumed_shape.py) ;; # skip, no test selected
@@ -200,4 +199,4 @@ jobs:
           done
 
 # import numpy.polynomial.polynomial as poly leaks
-# import numpy.matlib leaks
+# import numpy.matlib leaks by importing numpy.polynomial.polynomial through "from numpy import *"
