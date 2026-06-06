@@ -27,7 +27,7 @@ jobs:
   build_wheels:
     name: Build wheel ${{ matrix.python }}-${{ matrix.buildplat[1] }}-${{ matrix.buildplat[2] }}
     # To enable this job on a fork, comment out:
-    if: github.repository == 'numpy/numpy'
+    # if: github.repository == 'numpy/numpy'
     runs-on: ${{ matrix.buildplat[0] }}
     strategy:
       fail-fast: false
@@ -43,7 +43,7 @@ jobs:
           - [macos-14, macosx_arm64, openblas]
           - [windows-2022, win_amd64, ""]
           - [windows-11-arm, win_arm64, ""]
-        python: ["cp312"]
+        python: ["cp315"]
 
     env:
       IS_32_BIT: ${{ matrix.buildplat[1] == 'win32' }}  # used in cibw_test_command.sh
